@@ -5,8 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
-    // const models = await models.list();
-    // console.log('Available models:', models);
+
     const { prompt } = await req.json();
     console.log('Received prompt:', prompt);
 
@@ -19,8 +18,8 @@ export async function POST(req: NextRequest) {
     console.log('Generated text:', text);
 
     return NextResponse.json({ response: text });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating response:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Error generating response' }, { status: 500 });
   }
 }
