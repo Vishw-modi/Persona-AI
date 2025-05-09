@@ -40,6 +40,7 @@ export default function ChatPage() {
       <header className="p-4 bg-blue-600 text-white text-xl font-semibold">
         Gemini Chatbot
       </header>
+      <title>Gemini Chatbot clone</title>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
         {messages.map((msg, idx) => (
