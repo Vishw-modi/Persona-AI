@@ -93,8 +93,8 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen w-full sm:max-w-2xl mx-auto bg-[#1f1f1f] shadow-lg rounded-md overflow-hidden border border-gray-700">
-      <header className="p-3 sm:p-4 bg-[#121212] text-white text-lg sm:text-xl font-semibold tracking-wide shadow flex items-center justify-center">
-        PersonaBot
+      <header className="p-3 sm:p-4 bg-[#121212] text-white text-lg sm:text-xl font-semibold tracking-wide shadow flex justify-center">
+        PersonaAI
       </header>
 
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-4 bg-[#1a1a1a]">
