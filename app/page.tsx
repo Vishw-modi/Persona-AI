@@ -137,7 +137,7 @@ export default function ChatPage() {
 
         {loading && (
           <div className="text-sm text-gray-400 italic animate-pulse">
-            Gemini is typing...
+            Persona typing...
           </div>
         )}
         <div ref={chatEndRef} />
