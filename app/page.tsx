@@ -23,6 +23,16 @@ export default function ChatPage() {
       label: "Formal and Professional",
       value: "Respond in a formal and professional manner.",
     },
+    {
+      label: "Itinerary Generator",
+      value:
+        "You are an itinerary generator that helps users plan their trips in detail, with recommendations for activities, transport, and accommodations.",
+    },
+    {
+      label: "Nutrition Advisor",
+      value:
+        "You give meal suggestions and nutritional tips based on user preferences and dietary needs.",
+    },
   ];
   const [selectedBehavior, setSelectedBehavior] = useState(
     behaviorOptions[0].value
