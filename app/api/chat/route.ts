@@ -6,18 +6,44 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 export async function POST(req: NextRequest) {
   try {
 
-    const { prompt } = await req.json();
-    console.log('Received prompt:', prompt);
+    const { messages, fullPrompt } = await req.json();
 
-    const model = genAI.getGenerativeModel({  model: "gemini-2.0-flash", });
+  //  console.log("recieved messages" ,messages);
+   console.log("recieved inputs:" ,fullPrompt);
+   
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001", });
 
-    console.log('Generated text:', text);
+    const formattedHistory = messages.map((msg: { from: string; text: string }) => ({
+      role: msg.from === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    }));
 
-    return NextResponse.json({ response: text });
+    const chat = model.startChat({history: formattedHistory});
+
+    const resultStream = await chat.sendMessageStream(fullPrompt)
+
+
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async pull(controller){
+
+        for await (const chunk of resultStream.stream) {
+          const text = chunk.text()
+          if(text){
+            controller.enqueue(encoder.encode(text))
+          }
+        }
+        controller.close()
+      }
+    })
+  
+    return new NextResponse(stream, {
+      headers: {
+        'content-type': "text/plain; charset=utf-8",
+        'transfer-Encoding': 'chunked'
+      }
+    })
   } catch (error: unknown) {
     console.error('Error generating response:', error);
     return NextResponse.json({ error: 'Error generating response' }, { status: 500 });

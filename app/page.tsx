@@ -7,6 +7,27 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<{ from: string; text: string }[]>(
     []
   );
+
+  const behaviorOptions = [
+    { label: "Default", value: "You are a helpful and informative chatbot." },
+    {
+      label: "Friendly Sarcastic",
+      value: "You are a friendly and sarcastic assistant.",
+    },
+    {
+      label: "Enthusiastic Travel Guide",
+      value: "You are an enthusiastic and slightly dramatic travel guide.",
+    },
+    { label: "Concise and Direct", value: "Respond concisely and directly." },
+    {
+      label: "Formal and Professional",
+      value: "Respond in a formal and professional manner.",
+    },
+  ];
+  const [selectedBehavior, setSelectedBehavior] = useState(
+    behaviorOptions[0].value
+  );
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -14,21 +35,56 @@ export default function ChatPage() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    const behaviorPrompt = selectedBehavior;
+    const userMessageText = input;
+    const fullPrompt = `${behaviorPrompt} ${userMessageText}`;
+
     const userMessage = { from: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+
+    setMessages(newMessages);
     setInput("");
     setLoading(true);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: input }),
-    });
+    // console.log("Sending messages to API:", newMessages);
 
-    const data = await res.json();
-    const botMessage = { from: "bot", text: data.response || "Error!" };
-    setMessages((prev) => [...prev, botMessage]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages, fullPrompt }),
+      });
+
+      if (!res.body) throw new Error("No Response from server");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let botMessage = "";
+      let done = false;
+
+      setMessages((prev) => [...prev, { from: "bot", text: "" }]);
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+
+        const chunk = decoder.decode(value);
+        botMessage += chunk;
+
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.from === "bot") {
+            last.text = botMessage;
+          }
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error("error loading", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -36,13 +92,12 @@ export default function ChatPage() {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-white shadow-lg rounded-md overflow-hidden">
-      <header className="p-4 bg-blue-600 text-white text-xl font-semibold">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#1f1f1f] shadow-lg rounded-md overflow-hidden border border-gray-700">
+      <header className="p-4 bg-[#121212] text-white text-xl font-semibold tracking-wide shadow">
         Gemini Chatbot
       </header>
-      <title>Gemini Chatbot clone</title>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#1a1a1a]">
         {messages.map((msg, idx) => (
           <div
             key={idx}
@@ -51,34 +106,53 @@ export default function ChatPage() {
             }`}
           >
             <div
-              className={`max-w-md px-4 py-2 rounded-lg text-sm shadow ${
+              className={`max-w-md px-4 py-2 rounded-lg text-sm shadow transition-all duration-300 ${
                 msg.from === "user"
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-200 text-gray-800 rounded-bl-none"
+                  ? "bg-[#4c4c4c] text-white rounded-br-none"
+                  : "bg-[#2a2a2a] text-gray-200 rounded-bl-none"
               }`}
             >
               {msg.from === "bot" ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {msg.text}
-                </ReactMarkdown>
+                <div style={{ lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.text}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 msg.text
               )}
             </div>
           </div>
         ))}
+
         {loading && (
-          <div className="text-sm text-black italic font-600">
+          <div className="text-sm text-gray-400 italic animate-pulse">
             Gemini is typing...
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
-      <footer className="p-4 border-t bg-white">
+      <footer className="p-4 border-t border-gray-700 bg-[#121212]">
         <div className="flex items-center gap-2">
+          <select
+            className="border border-gray-600 rounded-lg px-2 py-2 text-sm bg-[#2a2a2a] text-white focus:outline-none focus:ring-2 focus:ring-gray-400"
+            value={selectedBehavior}
+            onChange={(e) => setSelectedBehavior(e.target.value)}
+          >
+            {behaviorOptions.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                className="bg-[#2a2a2a] text-white"
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+
           <input
-            className="flex-1 border border-gray-300 rounded px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 border border-gray-600 rounded-lg px-4 py-2 text-sm bg-[#2a2a2a] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -86,7 +160,7 @@ export default function ChatPage() {
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600 transition"
           >
             Send
           </button>
