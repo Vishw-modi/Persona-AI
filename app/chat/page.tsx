@@ -120,9 +120,13 @@ const Chat = () => {
           return updated;
         });
       }
-    } catch (err: any) {
-      console.error("Error:", err);
-      setError(err.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("error loading", error);
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     } finally {
       setLoading(false);
     }
