@@ -1,183 +1,131 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState<{ from: string; text: string }[]>(
-    []
-  );
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { MessageCircle, Sparkles, Zap, Users, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-  const behaviorOptions = [
-    { label: "Default", value: "You are a helpful and informative chatbot." },
+const Index = () => {
+  const features = [
     {
-      label: "Friendly Sarcastic",
-      value: "You are a friendly and sarcastic assistant.",
+      icon: MessageCircle,
+      title: "Smart Conversations",
+      description:
+        "Engage in natural, intelligent dialogue with advanced AI capabilities",
     },
     {
-      label: "Enthusiastic Travel Guide",
-      value: "You are an enthusiastic and slightly dramatic travel guide.",
-    },
-    { label: "Concise and Direct", value: "Respond concisely and directly." },
-    {
-      label: "Formal and Professional",
-      value: "Respond in a formal and professional manner.",
+      icon: Sparkles,
+      title: "Multiple Personas",
+      description:
+        "Choose from various AI personalities to match your conversation style",
     },
     {
-      label: "Itinerary Generator",
-      value:
-        "You are an itinerary generator that helps users plan their trips in detail, with recommendations for activities, transport, and accommodations.",
+      icon: Zap,
+      title: "Real-time Streaming",
+      description:
+        "Experience lightning-fast responses with real-time message streaming",
     },
     {
-      label: "Nutrition Advisor",
-      value:
-        "You give meal suggestions and nutritional tips based on user preferences and dietary needs.",
+      icon: Users,
+      title: "Personalized Experience",
+      description:
+        "Tailored responses based on your selected AI behavior and preferences",
     },
   ];
-  const [selectedBehavior, setSelectedBehavior] = useState(
-    behaviorOptions[0].value
-  );
-
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    const behaviorPrompt = selectedBehavior;
-    const userMessageText = input;
-    const fullPrompt = `${behaviorPrompt} ${userMessageText}`;
-
-    const userMessage = { from: "user", text: input };
-    const newMessages = [...messages, userMessage];
-
-    setMessages(newMessages);
-    setInput("");
-    setLoading(true);
-
-    // console.log("Sending messages to API:", newMessages);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages, fullPrompt }),
-      });
-
-      if (!res.body) throw new Error("No Response from server");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let botMessage = "";
-      let done = false;
-
-      setMessages((prev) => [...prev, { from: "bot", text: "" }]);
-
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-
-        const chunk = decoder.decode(value);
-        botMessage += chunk;
-
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last.from === "bot") {
-            last.text = botMessage;
-          }
-          return updated;
-        });
-      }
-    } catch (error) {
-      console.error("error loading", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   return (
-    <div className="flex flex-col h-screen w-full sm:max-w-2xl mx-auto bg-[#1f1f1f] shadow-lg rounded-md overflow-hidden border border-gray-700">
-      <header className="p-3 sm:p-4 bg-[#121212] text-white text-lg sm:text-xl font-semibold tracking-wide shadow flex justify-center">
-        PersonaAI
-      </header>
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-white">
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 animate-fade-in">
+              PersonaAI
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-600 mb-8 animate-fade-in delay-200">
+              Experience intelligent conversation with multiple AI personalities
+            </p>
+            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center animate-fade-in delay-300">
+              <Link href="/chat" passHref>
+                <Button asChild>
+                  <span>
+                    Start Chatting
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </span>
+                </Button>
+              </Link>
 
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-4 bg-[#1a1a1a]">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${
-              msg.from === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[80%] sm:max-w-md px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm shadow transition-all duration-300 ${
-                msg.from === "user"
-                  ? "bg-[#4c4c4c] text-white rounded-br-none"
-                  : "bg-[#2a2a2a] text-gray-200 rounded-bl-none"
-              }`}
-            >
-              {msg.from === "bot" ? (
-                <div style={{ lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.text}
-                  </ReactMarkdown>
-                </div>
-              ) : (
-                msg.text
-              )}
+              <Button variant="outline" size="lg" className="..." asChild>
+                <Link href="/learn-more">Learn More</Link>
+              </Button>
             </div>
           </div>
-        ))}
-
-        {loading && (
-          <div className="text-sm text-gray-400 italic animate-pulse">
-            Persona typing...
-          </div>
-        )}
-        <div ref={chatEndRef} />
+        </div>
       </div>
 
-      <footer className="p-3 sm:p-4 border-t border-gray-700 bg-[#121212]">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <select
-            className="border border-gray-600 rounded-lg px-2 py-2 text-sm bg-[#2a2a2a] text-white focus:outline-none focus:ring-2 focus:ring-gray-400"
-            value={selectedBehavior}
-            onChange={(e) => setSelectedBehavior(e.target.value)}
-          >
-            {behaviorOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                className="bg-[#2a2a2a] text-white"
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
+      {/* Features Section */}
+      <div className="container mx-auto px-4 py-20 bg-slate-50">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            Powerful AI Features
+          </h2>
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            Discover what makes PersonaAI the perfect companion for all your
+            conversational needs
+          </p>
+        </div>
 
-          <div className="flex flex-1 gap-2">
-            <input
-              className="flex-1 border border-gray-600 rounded-lg px-4 py-2 text-sm bg-[#2a2a2a] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="Type your message..."
-            />
-            <button
-              onClick={sendMessage}
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600 transition"
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <Card
+              key={index}
+              className="bg-white border-slate-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
             >
-              Send
-            </button>
-          </div>
+              <CardContent className="p-6 text-center">
+                <feature.icon className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-slate-600">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="container mx-auto px-4 py-20 bg-white">
+        <Card className="bg-slate-100 border-slate-200">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Ready to Start Conversations?
+            </h2>
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+              Join thousands of users who are already experiencing the future of
+              AI-powered conversations
+            </p>
+            <Link href="/chat" passHref>
+              <Button asChild>
+                <span>
+                  Launch PersonaAI
+                  <MessageCircle className="ml-2 h-5 w-5" />
+                </span>
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 py-12 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-slate-500">
+            © 2025 PersonaAI. Crafted with AI innovation.
+          </p>
         </div>
       </footer>
     </div>
   );
-}
+};
+
+export default Index;

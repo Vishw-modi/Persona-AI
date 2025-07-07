@@ -5,6 +5,8 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
+    if(!req.body) throw new Error("No request body");
+    if(!genAI) throw new Error("No Api Key")
 
     const { messages, fullPrompt } = await req.json();
 
