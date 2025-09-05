@@ -53,7 +53,7 @@ const Chat = () => {
     {
       label: "Nutrition Advisor",
       value:
-        "You give meal suggestions and nutritional tips based on user preferences and dietary needs.",
+        "You give meal suggestions and nutritional tips based on user preferences and dietary needs. If the question is not about food, health, or nutrition, respond with: I'm here to help with food and nutrition. Could you ask something related to that?",
     },
   ];
 
