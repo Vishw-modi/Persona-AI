@@ -321,7 +321,7 @@ const Index = () => {
               <Card className="bg-white/60 backdrop-blur-sm border-slate-200/50 shadow-md hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-4">
                   <p className="text-slate-600 mb-3 text-sm leading-relaxed">
-                    "{testimonial.content}"
+                    &dapos;{testimonial.content}&dapos;
                   </p>
                   <div className="text-xs">
                     <div className="font-semibold text-slate-800">
