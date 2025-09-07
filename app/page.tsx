@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { easeOut } from "framer-motion";
 
 const Index = () => {
   const features = [
@@ -80,7 +81,7 @@ const Index = () => {
       y: 0,
       transition: {
         duration: 0.4,
-        ease: "easeOut",
+        ease: easeOut,
       },
     },
   };
@@ -92,7 +93,7 @@ const Index = () => {
       y: 0,
       transition: {
         duration: 0.4,
-        ease: "easeOut",
+        ease: easeOut,
       },
     },
     hover: {
@@ -100,7 +101,7 @@ const Index = () => {
       scale: 1.01,
       transition: {
         duration: 0.2,
-        ease: "easeOut",
+        ease: easeOut,
       },
     },
   };
@@ -148,7 +149,7 @@ const Index = () => {
                 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-3"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                transition={{ duration: 0.6, ease: easeOut }}
               >
                 PersonaAI
               </motion.h1>
