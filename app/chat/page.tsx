@@ -1,8 +1,11 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, ArrowLeft, Bot, User } from "lucide-react";
+import { Send, ArrowLeft, Bot, User, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const Chat = () => {
@@ -140,147 +143,259 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-slate-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
-        <Link href="/">
-          <Button variant="ghost" className="text-slate-700 hover:bg-slate-100">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Home
-          </Button>
-        </Link>
-        <h1 className="text-xl font-bold text-slate-900">PersonaAI Chat</h1>
-        <div className="w-24" />
+    <div className="h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex flex-col relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400/10 to-pink-400/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 180, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
+        />
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-100 text-red-600 text-sm text-center py-2">
-          {error}
-        </div>
-      )}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/80 backdrop-blur-xl relative z-10"
+      >
+        <Link href="/">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              className="text-slate-700 hover:bg-white/60"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+          </motion.div>
+        </Link>
+        <motion.div
+          className="flex items-center space-x-2"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Sparkles className="h-5 w-5 text-blue-600" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            PersonaAI Chat
+          </h1>
+        </motion.div>
+        <div className="w-24" />
+      </motion.div>
 
-      {/* Persona Selector */}
-      <div className="px-4 py-3 bg-white border-b border-gray-200">
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-red-100 text-red-600 text-sm text-center py-2 border-b border-red-200"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="px-4 py-3 bg-white/60 backdrop-blur-sm border-b border-white/20 relative z-10"
+      >
         <Select value={selectedBehavior} onValueChange={setSelectedBehavior}>
-          <SelectTrigger className="w-full max-w-md mx-auto bg-white border-slate-300 text-slate-900">
+          <SelectTrigger className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm border-slate-200 text-slate-900 shadow-sm hover:shadow-md transition-shadow">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-white border-slate-200">
+          <SelectContent className="bg-white/95 backdrop-blur-sm border-slate-200">
             {behaviorOptions.map((option) => (
               <SelectItem
                 key={option.value}
                 value={option.value}
-                className="text-slate-900"
+                className="text-slate-900 hover:bg-blue-50"
               >
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
-      {/* Chat Area */}
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-3 relative z-10"
       >
-        {messages.length === 0 && (
-          <div className="text-center text-slate-500 mt-20">
-            <Bot className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg">Start a conversation with PersonaAI</p>
-            <p className="text-sm mt-2">
-              Choose a persona and type your message below
-            </p>
-          </div>
-        )}
+        <AnimatePresence>
+          {messages.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center text-slate-500 mt-12"
+            >
+              <motion.div
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              >
+                <Bot className="h-12 w-12 mx-auto mb-3 opacity-60 text-blue-500" />
+              </motion.div>
+              <p className="text-lg font-medium">
+                Start a conversation with PersonaAI
+              </p>
+              <p className="text-sm mt-1 opacity-75">
+                Choose a persona and type your message below
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${
-              msg.from === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`flex items-start space-x-3 max-w-[80%] ${
-                msg.from === "user" ? "flex-row-reverse space-x-reverse" : ""
+        <AnimatePresence>
+          {messages.map((msg, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className={`flex ${
+                msg.from === "user" ? "justify-end" : "justify-start"
               }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  msg.from === "user" ? "bg-slate-700" : "bg-slate-200"
+                className={`flex items-start space-x-3 max-w-[85%] ${
+                  msg.from === "user" ? "flex-row-reverse space-x-reverse" : ""
                 }`}
               >
-                {msg.from === "user" ? (
-                  <User className="h-4 w-4 text-white" />
-                ) : (
-                  <Bot className="h-4 w-4 text-slate-700" />
-                )}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
+                    msg.from === "user"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600"
+                      : "bg-white border border-slate-200"
+                  }`}
+                >
+                  {msg.from === "user" ? (
+                    <User className="h-4 w-4 text-white" />
+                  ) : (
+                    <Bot className="h-4 w-4 text-blue-600" />
+                  )}
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className={`px-4 py-3 rounded-2xl shadow-sm backdrop-blur-sm ${
+                    msg.from === "user"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md"
+                      : "bg-white/80 text-slate-900 rounded-bl-md border border-white/20"
+                  }`}
+                >
+                  {msg.from === "bot" ? (
+                    <div className="prose prose-slate prose-sm max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                  )}
+                </motion.div>
               </div>
-              <div
-                className={`px-4 py-3 rounded-2xl shadow-sm ${
-                  msg.from === "user"
-                    ? "bg-slate-900 text-white rounded-br-md"
-                    : "bg-slate-100 text-slate-900 rounded-bl-md"
-                }`}
-              >
-                {msg.from === "bot" ? (
-                  <div className="prose prose-slate prose-sm max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {msg.text}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                <Bot className="h-4 w-4 text-slate-700" />
-              </div>
-              <div className="bg-slate-100 px-4 py-3 rounded-2xl rounded-bl-md">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-75"></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></div>
+        <AnimatePresence>
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex justify-start"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                  <Bot className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl rounded-bl-md border border-white/20">
+                  <div className="flex space-x-1">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-blue-400 rounded-full"
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Number.POSITIVE_INFINITY,
+                          delay: i * 0.2,
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 bg-white border-t border-gray-200">
-        <div className="flex space-x-4">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1"
-            disabled={loading}
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="bg-slate-900 hover:bg-slate-800"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-white/20 relative z-10"
+      >
+        <div className="flex space-x-3">
+          <motion.div className="flex-1" whileFocus={{ scale: 1.02 }}>
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message..."
+              className="bg-white/60 backdrop-blur-sm border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              disabled={loading}
+            />
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
