@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
    console.log("recieved inputs:" ,fullPrompt);
    
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001", });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", });
 
     const formattedHistory = messages.map((msg: { from: string; text: string }) => ({
       role: msg.from === 'user' ? 'user' : 'model',
